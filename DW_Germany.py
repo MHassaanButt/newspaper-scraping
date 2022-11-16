@@ -1,7 +1,7 @@
 """
 In this script, we will be extracting the news from the given url. The news will be stored in a dataframe file.
 The News are from the given url.
-    ---TheNews 
+    ---TheNews
     ---Hidustan Times
     ---BBC News
 
@@ -94,6 +94,8 @@ class DW():
             title = soup.find("meta",  {"property": "og:title"})[
                 'content']
             if title:
+                title=title.split(' – DW – ')[0]
+                # print(title)
                 return title
             else:
                 title = soup.find('h2', class_=['story__title', 'text-7.5', 'font-bold', 'font-playfair-display', 'mt-1', 'pb-3', 'border-b', 'border-gray-300', 'border-solid',
@@ -101,6 +103,7 @@ class DW():
                 # title = soup.find('h2').get_text(strip=True)
         except:
             title = "No Title"
+
         return title
 
     def News_Time(self, soup):
@@ -118,6 +121,9 @@ class DW():
                 time = time.split('+')[0]
         except:
             now = datetime.now()
+            time = soup.find('span', class_=[
+                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+            print("Scraped Date", time)
             time = now.strftime("%H:%M:%S")
 
         return time
@@ -128,8 +134,8 @@ class DW():
                 'content']
             date = date.split(' ')[0]
         except:
-            date = soup.find('span', class_=[
-                             "timestamp--date", "timestamp--time ", " timeago"]).get_text(strip=True).replace('Published', '')
+            date = soup.find('span', class_=["sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+            print("Scraped Date", date)
         return date
 
         # date = re.sub('\s+', ' ', date)[0:11]
@@ -232,8 +238,8 @@ class DW():
 
     def Short_Description(self, soup):
         try:
-            short_desc = soup.find(
-                'h2', attrs={'class': 'sortDec'}).get_text(strip=True)
+            short_desc = soup.find("meta",  {"property": "og:description"})[
+                'content']
         except:
             short_desc = soup.find(
                 'h2', attrs={'class': 'summary-desc'}).get_text(strip=True)
@@ -374,8 +380,7 @@ class DW():
         # news_words = [i for i in word_tokenize(news_text.lower()) if i not in stopwords]
         clean_text = (" ").join(news_words)
         clean_text = self.Remove_non_Ascii(clean_text)
-        news_words = [i for i in news_text.lower().split()
-                      if i not in stopwords]
+        news_words = [i for i in news_text.lower().split() if i not in stopwords]
         news_words_count = len(news_words)
 
         # news_word_cloud = WordCloud(collocations = False, background_color = 'white').generate(clean_text)
@@ -400,9 +405,7 @@ class DW():
         news_text = news_text.replace("'", " ")
         news_text = news_text.replace("\n", "")
         news_text = news_text.replace('"', '')
-        if news_text == '':
-            news_text = 'NAN'
-        else:
+        if news_text is not None:
             try:
                 news_summary = text_summarizer(news_text).replace("\n", "")
                 total_news_words, news_word_cloud = self.Count_Text_Words(
@@ -542,7 +545,7 @@ class DW():
                     if a['href'] and len(a['href']) > 50:
                         link = main_url + a['href']
                         all_links.append(link)
-                        print(link)
+                        # print(link)
 
                     else:
                         continue
