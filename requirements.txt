@@ -1,0 +1,16 @@
+sympy
+textacy
+scikit-learn
+nltk
+joblib
+textblob
+spacy
+geotext
+geopy
+bs4
+newspaper3k
+wordcloud
+pandas
+gensim
+#python -m spacy download en_core_web_sm
+# nltk.download() and choose all-nltk for installation
