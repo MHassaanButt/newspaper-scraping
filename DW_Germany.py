@@ -94,7 +94,7 @@ class DW():
             title = soup.find("meta",  {"property": "og:title"})[
                 'content']
             if title:
-                title=title.split(' – DW – ')[0]
+                title = title.split(' – DW – ')[0]
                 # print(title)
                 return title
             else:
@@ -108,25 +108,37 @@ class DW():
 
     def News_Time(self, soup):
         try:
-            time = soup.find("meta",  {"property": "article:published_time"})[
-                'content']
-            time = time.split(' ')[1]
-            if time:
+            format = '%H:%M:%S'
+            time_now = datetime.now()
+            time_now = time_now.strftime("%H:%M:%S")
+            time_scraped = soup.find('div', class_=[
+                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-kNjMHG gVTqVh time-area"]).get_text(strip=True).replace('Published', '')
+
+            if "hour" in time_scraped:
+                time_scraped = time_scraped.split(' ')[0]
+                time_scraped = str(time_scraped+':00:00')
+                time = datetime.strptime(time_now, format) - \
+                    datetime.strptime(time_scraped, format)
+                # time = time.strftime("%H:%M:%S")    
+                return time
+            elif "min" in time_scraped:
+                time_scraped = time_scraped.split(' ')[0]
+                time_scraped = str('00:'+time_scraped+':00')
+            #     print(time_scraped)
+                
+                time = datetime.strptime(time_now, format) - \
+                    datetime.strptime(time_scraped, format)
+                # time = time.strftime("%H:%M:%S")
                 return time
             else:
-                time = soup.find(
-                    'span', class_=["timestamp--time", "timeago"]).attrs['title']
-                time = re.sub('\s+', ' ', time)
-                time = time.split('T')[1]
-                time = time.split('+')[0]
-        except:
-            now = datetime.now()
-            time = soup.find('span', class_=[
-                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
-            print("Scraped Date", time)
-            time = now.strftime("%H:%M:%S")
+                print("Invalid Time")
+            time = time.strftime("%H:%M:%S")
 
-        return time
+            return time
+
+        except:
+            time_now = datetime.now()
+            return time_now
 
     def News_Date(self, soup):
         try:
@@ -134,9 +146,20 @@ class DW():
                 'content']
             date = date.split(' ')[0]
         except:
-            date = soup.find('span', class_=["sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
-            print("Scraped Date", date)
-        return date
+            cur_date = soup.find('span', class_=[
+                             "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+            from datetime import date
+            today = date.today()
+            today = today.strftime("%m/%d/%y")
+            if "ago" in cur_date:
+                return today
+            # print("Scraped Date", date)
+            else:
+                cur_date = soup.find('span', class_=[
+                    "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+                return cur_date
+
+
 
         # date = re.sub('\s+', ' ', date)[0:11]
         # date = soup.find('div', attrs={'class': "dateTime secTime"}).get_text(strip=True)[13:]
@@ -379,8 +402,9 @@ class DW():
         news_words = self.Dup_Function(news_words)
         # news_words = [i for i in word_tokenize(news_text.lower()) if i not in stopwords]
         clean_text = (" ").join(news_words)
-        clean_text = self.Remove_non_Ascii(clean_text)
-        news_words = [i for i in news_text.lower().split() if i not in stopwords]
+        # clean_text = self.Remove_non_Ascii(clean_text)
+        news_words = [i for i in news_text.lower().split()
+                      if i not in stopwords]
         news_words_count = len(news_words)
 
         # news_word_cloud = WordCloud(collocations = False, background_color = 'white').generate(clean_text)
