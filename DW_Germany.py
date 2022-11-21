@@ -119,13 +119,13 @@ class DW():
                 time_scraped = str(time_scraped+':00:00')
                 time = datetime.strptime(time_now, format) - \
                     datetime.strptime(time_scraped, format)
-                # time = time.strftime("%H:%M:%S")    
+                # time = time.strftime("%H:%M:%S")
                 return time
             elif "min" in time_scraped:
                 time_scraped = time_scraped.split(' ')[0]
                 time_scraped = str('00:'+time_scraped+':00')
             #     print(time_scraped)
-                
+
                 time = datetime.strptime(time_now, format) - \
                     datetime.strptime(time_scraped, format)
                 # time = time.strftime("%H:%M:%S")
@@ -142,24 +142,21 @@ class DW():
 
     def News_Date(self, soup):
         try:
-            date = soup.find("meta",  {"property": "article:published_time"})[
-                'content']
-            date = date.split(' ')[0]
+            cur_date = soup.find('span', class_=[
+                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+            return cur_date
         except:
             cur_date = soup.find('span', class_=[
-                             "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
+                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
             from datetime import date
-            today = date.today()
-            today = today.strftime("%m/%d/%y")
+            
             if "ago" in cur_date:
+                today = date.today()
+                today = today.strftime("%m/%d/%y")
                 return today
             # print("Scraped Date", date)
             else:
-                cur_date = soup.find('span', class_=[
-                    "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
-                return cur_date
-
-
+                return "No Date"
 
         # date = re.sub('\s+', ' ', date)[0:11]
         # date = soup.find('div', attrs={'class': "dateTime secTime"}).get_text(strip=True)[13:]
@@ -220,17 +217,8 @@ class DW():
 
     def Image_Alt_Text(self, soup):
         try:
-            images = soup.find('figcaption', class_=[
-                               "media__caption"]).get_text(strip=True)
-            if not images:
-                image_alt = None
-            else:
-                for img in images:
-                    if img.find('img') is not None:
-                        image_alt = img.find('img')['alt']
-                        return image_alt
-                    else:
-                        image_alt = None
+            images_alt = soup.find("meta",  {"property": "og:image:alt"})[
+                'content']
             return images_alt
         except:
             images_alt = None
@@ -490,8 +478,12 @@ class DW():
 
     def News_Section(self, soup):
         try:
-            news_section = soup.find(
-                'div', attrs={'class': 'secName'}).get_text(strip=True).title()
+            news_section = soup.find_all(
+                'div', attrs={'class': 'sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-gfbRpc gtRDfy kicker sc-hbyLVd jqlWTM'})
+            for sec in news_section:
+                for span in sec.find_all('span'):
+                    print(span.text)
+                    return span.text
         except:
             news_section = "No Section"
         return news_section
@@ -573,6 +565,24 @@ class DW():
 
                     else:
                         continue
+            results = soup.find_all(
+                'div', class_=['sc-gkJlnC darKnE sc-dSuTWQ cedyKl row teaser', ])
+            # results_links = [i for i in results if i is not None]
+            for div in results:
+                links = div.findAll('a', href=True)
+                # a_tag.append(links)
+                for a in links:
+                    if a['href'] and len(a['href']) > 50:
+                        link = main_url + a['href']
+                        if 'video' in link:
+                            print("This link contains video")
+                            continue
+                        all_links.append(link)
+                        # print(link)
+
+                    else:
+                        continue
+
             all_links = [i for i in set(all_links)]
             return all_links
         else:
@@ -732,13 +742,14 @@ if __name__ == "__main__":
     print("-------------------------------Scraping DW Germany News -------------------------------")
     scrap = DW()
     latest = 'https://www.dw.com/en/top-stories/s-9097'
-    national = 'https://www.khaleejtimes.com/uae'
+    national = 'https://www.dw.com/en/germany/s-1432'
+    africa = 'https: // www.dw.com/en/africa/s-12756'
     world = 'https://www.khaleejtimes.com/world'
-
+# 
     scrap_latest = scrap.scrap_latest_news(latest)
     # scrap_national = scrap.scrap_national_news(national)
-    # scrap_world = scrap.scrap_world_news(world)
+    scrap_world = scrap.scrap_world_news(world)
 
-    # # df_news = pd.DataFrame.from_dict(latest)
-    # df_news.to_csv('all_DW_wrold_scraped.csv', index=False)
-    # df_news.head()
+    df_news = pd.DataFrame.from_dict(scrap_world)
+    df_news.to_csv('national_DW_scraped.csv', index=False)
+    df_news.head()
