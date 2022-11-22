@@ -14,6 +14,7 @@ Output:
 """
 
 # import the required modules and libraries
+import re
 from sympy import elliptic_f
 import textacy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -38,6 +39,7 @@ from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.stem.porter import PorterStemmer
 from newspaper import Article
 import newspaper
+from datetime import date as d
 from newspaper import Config
 from nltk.tag import pos_tag
 from spacy.lang.en.stop_words import STOP_WORDS
@@ -119,6 +121,9 @@ class DW():
                 time_scraped = str(time_scraped+':00:00')
                 time = datetime.strptime(time_now, format) - \
                     datetime.strptime(time_scraped, format)
+                time = time.split(',')[1]
+
+                # time = time.split(' ')[1]
                 # time = time.strftime("%H:%M:%S")
                 return time
             elif "min" in time_scraped:
@@ -133,30 +138,31 @@ class DW():
             else:
                 print("Invalid Time")
             time = time.strftime("%H:%M:%S")
-
+            # print("--------Time ---------------------", time)
             return time
 
         except:
+
             time_now = datetime.now()
+            time_now = time_now.strftime("%H:%M:%S")
+            # print("--------Time Now---------------------", time_now)
             return time_now
 
     def News_Date(self, soup):
         try:
-            cur_date = soup.find('span', class_=[
-                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
-            return cur_date
-        except:
-            cur_date = soup.find('span', class_=[
-                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-dWINGa iVpeYX publication"]).get_text(strip=True).replace('Published', '')
-            from datetime import date
-            
+
+            cur_date = soup.find('time').text
+            print("-------------------------------------------------------------------")
+            print('----------------', cur_date,)
             if "ago" in cur_date:
-                today = date.today()
-                today = today.strftime("%m/%d/%y")
+                today = d.today()
+                today = today.strftime("%m/%d/%Y")
                 return today
-            # print("Scraped Date", date)
             else:
-                return "No Date"
+                return cur_date
+
+        except:
+            return "No Date"
 
         # date = re.sub('\s+', ' ', date)[0:11]
         # date = soup.find('div', attrs={'class': "dateTime secTime"}).get_text(strip=True)[13:]
@@ -614,6 +620,11 @@ class DW():
                     news_authors_source = self.News_Source_Link(soup)
                     news_time = self.News_Time(soup)
                     news_date = self.News_Date(soup)
+                    # try:
+                    #     txt = news_date
+                    #     news_date = re.search("\d\d/\d\d/\d\d\d\d", txt)[0]
+                    # except:
+                    #     pass
                     news_short_desc = self.Short_Description(soup)
                     news_image_text = self.Image_Alt_Text(soup)
                     news_section = self.News_Section(soup)
@@ -626,41 +637,41 @@ class DW():
                     news_event = self.Event_Extraction(news_short_desc)
                     country, city, address, latitude, longitude = self.Geographic_Details(
                         news_text)
-                    print('**********************************')
-                    print(f'News URL: {url}\n')
-                    print(f'News Source: {name}\n')
-                    print(f'News Section: {news_section}\n')
-                    print(f'News Title: {news_title}\n')
-                    print(f'News Author: {news_authors}\n')
-                    print(
-                        f'News Author Source link: {news_authors_source}\n')
-                    print(f'News Publish Date: {news_date}\n')
-                    print(f'News Publish Time: {news_time}\n')
-                    print(f'News Short Description: {news_short_desc}\n')
-                    print(f'News Image Alt Text: {news_image_text}\n')
-                    print(f'News Top Image URL: {news_image_link}\n')
-                    print(f'News Complete Nouns:  {news_complete_nouns}\n')
-                    print(f'News Cardinal Digit:  {news_cardinal_digit}\n')
-                    print(
-                        f'News Targeted Persons in News:  {target_names}\n')
-                    print(
-                        f'News Total Words in News Details:  {total_news_words}\n')
-                    print(
-                        f'News Total Words in News Summary:  {total_news_words}\n')
-                    print(f'News Article:  {news_text}\n')
-                    print(f'News Summary:  {news_summary}\n')
-                    print(
-                        f'News Sentiments WRT Subjectivity:  {news_subjectivity}\n')
-                    print(f'News Sentiment Score:  {news_polarity}\n')
-                    print(f'News Sentiment Anaylsis:  {news_sentiment}\n')
-                    print(f'News Classification:  {news_classification}\n')
-                    print(f'News Events:  {news_event}\n')
-                    print(f'News Country:  {country}\n')
-                    print(f'News City:  {city}\n')
-                    print(f'News Address:  {address}\n')
-                    print(f'News Latitude:  {latitude}\n')
-                    print(f'News Longitude:  {longitude}\n')
-                    print('**********************************')
+                    # print('**********************************')
+                    # print(f'News URL: {url}\n')
+                    # print(f'News Source: {name}\n')
+                    # print(f'News Section: {news_section}\n')
+                    # print(f'News Title: {news_title}\n')
+                    # print(f'News Author: {news_authors}\n')
+                    # print(
+                    #     f'News Author Source link: {news_authors_source}\n')
+                    # print(f'News Publish Date: {news_date}\n')
+                    # print(f'News Publish Time: {news_time}\n')
+                    # print(f'News Short Description: {news_short_desc}\n')
+                    # print(f'News Image Alt Text: {news_image_text}\n')
+                    # print(f'News Top Image URL: {news_image_link}\n')
+                    # print(f'News Complete Nouns:  {news_complete_nouns}\n')
+                    # print(f'News Cardinal Digit:  {news_cardinal_digit}\n')
+                    # print(
+                    #     f'News Targeted Persons in News:  {target_names}\n')
+                    # print(
+                    #     f'News Total Words in News Details:  {total_news_words}\n')
+                    # print(
+                    #     f'News Total Words in News Summary:  {total_news_words}\n')
+                    # print(f'News Article:  {news_text}\n')
+                    # print(f'News Summary:  {news_summary}\n')
+                    # print(
+                    #     f'News Sentiments WRT Subjectivity:  {news_subjectivity}\n')
+                    # print(f'News Sentiment Score:  {news_polarity}\n')
+                    # print(f'News Sentiment Anaylsis:  {news_sentiment}\n')
+                    # print(f'News Classification:  {news_classification}\n')
+                    # print(f'News Events:  {news_event}\n')
+                    # print(f'News Country:  {country}\n')
+                    # print(f'News City:  {city}\n')
+                    # print(f'News Address:  {address}\n')
+                    # print(f'News Latitude:  {latitude}\n')
+                    # print(f'News Longitude:  {longitude}\n')
+                    # print('**********************************')
 
                     df_news["News_URL"].append(url)
                     df_news["News_Source"].append(name)
@@ -743,13 +754,28 @@ if __name__ == "__main__":
     scrap = DW()
     latest = 'https://www.dw.com/en/top-stories/s-9097'
     national = 'https://www.dw.com/en/germany/s-1432'
-    africa = 'https: // www.dw.com/en/africa/s-12756'
-    world = 'https://www.khaleejtimes.com/world'
-# 
-    scrap_latest = scrap.scrap_latest_news(latest)
-    # scrap_national = scrap.scrap_national_news(national)
-    scrap_world = scrap.scrap_world_news(world)
 
-    df_news = pd.DataFrame.from_dict(scrap_world)
-    df_news.to_csv('national_DW_scraped.csv', index=False)
-    df_news.head()
+    regions = ['africa/s-12756', 'latin-america/s-58267484',
+               'asia/s-12758', 'middle-east/s-14207', 'europe/s-1433', 'north-america/s-58267502']
+
+#
+    scrap_latest = scrap.scrap_latest_news(national)
+    scrap_national = scrap.scrap_national_news(national)
+    regional = pd.DataFrame()
+    for i in range(len(regions)):
+        url = 'https://www.dw.com/en/'+regions[i]
+        print(url)
+        scrap_world = scrap.scrap_world_news(url)
+        df_news = pd.DataFrame.from_dict(scrap_world)
+
+        #df_news.to_csv(region.replace('/', '_')+'.csv', index=False)
+        if i == 0:
+            regional = df_news
+        else:
+            regional = pd.concat([regional, df_news], axis=0)
+
+    df_news = pd.DataFrame.from_dict(scrap_latest)
+    df_news = pd.DataFrame.from_dict(scrap_national)
+    df_news = pd.DataFrame.from_dict(regional)
+    regional.to_csv('regional.csv', index=False)
+    # df_news.head()
