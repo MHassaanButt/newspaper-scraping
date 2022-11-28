@@ -51,7 +51,7 @@ stopwords = ["1qfy23", "eu", "t", "and", "s", "â€", "0o", "0s", "3a", "3b",
              "namely", "nay", "nc", "nd", "ne", "near", "nearly", "necessarily", "necessary", "need", "needn", "needn't", "needs", "neither", "never", "nevertheless", "new", "next", "ng", "ni", "nine", "ninety", "nj", "nl", "nn", "no", "nobody", "non", "none", "nonetheless", "noone", "nor", "normally", "nos", "not", "noted", "nothing", "novel", "now", "nowhere", "nr", "ns", "nt", "ny", "o", "oa", "ob", "obtain", "obtained", "obviously", "oc", "od", "of", "off", "often", "og", "oh", "oi", "oj", "ok", "okay", "ol", "old", "om", "omitted", "on", "once", "one", "ones", "only", "onto", "oo", "op", "oq", "or", "ord", "os", "ot", "other", "others", "otherwise", "ou", "ought", "our", "ours", "ourselves", "out", "outside", "over", "overall", "ow", "owing", "own", "ox", "oz", "p", "p1", "p2", "p3", "page", "pagecount", "pages", "par", "part", "particular", "particularly", "pas", "past", "pc", "pd", "pe", "per", "perhaps", "pf", "ph", "pi", "pj", "pk", "pl", "placed", "please", "plus", "pm", "pn", "po", "poorly", "possible", "possibly", "potentially", "pp", "pq", "pr", "predominantly", "present", "presumably", "previously", "primarily", "probably", "promptly", "proud", "provides", "ps", "pt", "pu", "put", "py", "q", "qj", "qu", "que", "quickly", "quite", "qv", "r", "r2", "ra", "ran", "rather", "rc", "rd", "re", "readily", "really", "reasonably", "recent", "recently", "ref", "refs", "regarding", "regardless", "regards", "related", "relatively", "research", "research-articl", "respectively", "resulted", "resulting", "results", "rf", "rh", "ri", "right", "rj", "rl", "rm", "rn", "ro", "rq", "rr", "rs", "rt", "ru", "run", "rv", "ry", "s", "s2", "sa", "said", "same", "saw", "say", "saying", "says", "sc", "sd", "se", "sec", "second", "secondly", "section", "see", "seeing", "seem", "seemed", "seeming", "seems", "seen", "self", "selves", "sensible", "sent", "serious", "seriously", "seven", "several", "sf", "shall", "shan", "shan't", "she", "shed", "she'd", "she'll", "shes", "she's", "should", "shouldn", "shouldn't", "should've", "show", "showed", "shown", "showns", "shows", "si", "side", "significant", "significantly", "similar", "similarly", "since", "sincere", "six", "sixty", "sj", "sl", "slightly", "sm", "sn", "so", "some", "somebody", "somehow", "someone", "somethan", "something", "sometime", "sometimes", "somewhat", "somewhere", "soon", "sorry", "sp", "specifically", "specified", "specify", "specifying", "sq", "sr", "ss", "st", "still", "stop", "strongly", "sub", "substantially", "successfully", "such", "sufficiently", "suggest", "sup", "sure", "sy", "system", "sz", "t", "t1", "t2", "t3", "take", "taken", "taking", "tb", "tc", "td", "te", "tell", "ten", "tends", "tf", "th", "than", "thank", "thanks", "thanx", "that", "that'll", "thats", "that's", "that've", "the", "their", "theirs", "them", "themselves", "then", "thence", "there", "thereafter", "thereby", "thered", "therefore", "therein", "there'll", "thereof", "therere", "theres", "there's", "thereto", "thereupon", "there've", "these", "they", "theyd", "they'd", "they'll", "theyre", "they're", "they've", "thickv", "thin", "think", "third", "this", "thorough", "thoroughly", "those", "thou", "though", "thoughh", "thousand", "three", "throug", "through", "throughout", "thru", "thus", "ti", "til", "tip", "tj", "tl", "tm", "tn", "to", "together", "too", "took", "top", "toward", "towards", "tp", "tq", "tr", "tried", "tries", "truly", "try", "trying", "ts", "t's", "tt", "tv", "twelve", "twenty", "twice", "two", "tx", "u", "u201d", "ue", "ui", "uj", "uk", "um", "un", "under", "unfortunately", "unless", "unlike", "unlikely", "until", "unto", "uo", "up", "upon", "ups", "ur", "us", "use", "used", "useful", "usefully", "usefulness", "uses", "using", "usually", "ut", "v", "va", "value", "various", "vd", "ve", "ve", "very", "via", "viz", "vj", "vo", "vol", "vols", "volumtype", "vq", "vs", "vt", "vu", "w", "wa", "want", "wants", "was", "wasn", "wasnt", "wasn't", "way", "we", "wed", "we'd", "welcome", "well", "we'll", "well-b", "went", "were", "we're", "weren", "werent", "weren't", "we've", "what", "whatever", "what'll", "whats", "what's", "when", "whence", "whenever", "when's", "where", "whereafter", "whereas", "whereby", "wherein", "wheres", "where's", "whereupon", "wherever", "whether", "which", "while", "whim", "whither", "who", "whod", "whoever", "whole", "who'll", "whom", "whomever", "whos", "who's", "whose", "why", "why's", "wi", "widely", "will", "willing", "wish", "with", "within", "without", "wo", "won", "wonder", "wont", "won't", "words", "world", "would", "wouldn", "wouldnt", "wouldn't", "www", "x", "x1", "x2", "x3", "xf", "xi", "xj", "xk", "xl", "xn", "xo", "xs", "xt", "xv", "xx", "y", "y2", "yes", "yet", "yj", "yl", "you", "youd", "you'd", "you'll", "your", "youre", "you're", "yours", "yourself", "yourselves", "you've", "yr", "ys", "yt", "z", "zero", "zi", "zz", ] + list(STOP_WORDS)
 
 
-class DW():
+class RT():
     """
     This class will be used to scrap the news from the given url.
     """
@@ -74,21 +74,25 @@ class DW():
 
     def B_Soup(self, html_document):
         soup = BeautifulSoup(html_document, 'html.parser')
+        # print("This is thewsoup", soup)
         # soup.prettify()
         return soup
 
     def News_Title(self, soup):
         try:
-            title = soup.find("meta",  {"property": "og:title"})[
-                'content']
-            if title:
-                title = title.split(' – DW – ')[0]
-                # print(title)
-                return title
-            else:
-                title = soup.find('h2', class_=['story__title', 'text-7.5', 'font-bold', 'font-playfair-display', 'mt-1', 'pb-3', 'border-b', 'border-gray-300', 'border-solid',
-                                  'text-6', 'sm:text-10.5', 'text-center', 'text-black-400 hover:text-pink-default', 'leading-tight', 'mt-2', 'sm:mt-8', 'pb-4  ']).get_text(strip=True)
-                # title = soup.find('h2').get_text(strip=True)
+            title = soup.find("title").get_text(strip=True)
+            # print("Titlw is Found",title)
+            return title
+            # title = soup.find("meta",  {"property": "og:title"})[
+            #     'content']
+            # if title:
+            #     # title = title.split(' – RT – ')[0]
+            #     # print(title)
+            #     return title
+            # else:
+            #     title = soup.find('h2', class_=['story__title', 'text-7.5', 'font-bold', 'font-playfair-display', 'mt-1', 'pb-3', 'border-b', 'border-gray-300', 'border-solid',
+            #                       'text-6', 'sm:text-10.5', 'text-center', 'text-black-400 hover:text-pink-default', 'leading-tight', 'mt-2', 'sm:mt-8', 'pb-4  ']).get_text(strip=True)
+            #     # title = soup.find('h2').get_text(strip=True)
         except:
             title = "No Title"
 
@@ -96,35 +100,36 @@ class DW():
 
     def News_Time(self, soup):
         try:
-            format = '%H:%M:%S'
-            time_now = datetime.now()
-            time_now = time_now.strftime("%H:%M:%S")
-            time_scraped = soup.find('div', class_=[
-                "sc-bBrHrO sc-llJcti bTxTGD fJQkxy sc-kNjMHG gVTqVh time-area"]).get_text(strip=True).replace('Published', '')
+            # format = '%H:%M:%S'
+            # time_now = datetime.now()
+            # time_now = time_now.strftime("%H:%M:%S")
+            time = soup.find('span', class_=[
+                "date date_article-header"]).get_text(strip=True)
+            time = time.split(" ")[3]
 
-            if "hour" in time_scraped:
-                time_scraped = time_scraped.split(' ')[0]
-                time_scraped = str(time_scraped+':00:00')
-                time = datetime.strptime(time_now, format) - \
-                    datetime.strptime(time_scraped, format)
-                time = time.split(',')[1]
+            # if "hour" in time_scraped:
+            #     time_scraped = time_scraped.split(' ')[0]
+            #     time_scraped = str(time_scraped+':00:00')
+            #     time = datetime.strptime(time_now, format) - \
+            #         datetime.strptime(time_scraped, format)
+            #     time = time.split(',')[1]
 
-                # time = time.split(' ')[1]
-                # time = time.strftime("%H:%M:%S")
-                return time
-            elif "min" in time_scraped:
-                time_scraped = time_scraped.split(' ')[0]
-                time_scraped = str('00:'+time_scraped+':00')
-            #     print(time_scraped)
+            #     # time = time.split(' ')[1]
+            #     # time = time.strftime("%H:%M:%S")
+            #     return time
+            # elif "min" in time_scraped:
+            #     time_scraped = time_scraped.split(' ')[0]
+            #     time_scraped = str('00:'+time_scraped+':00')
+            # #     print(time_scraped)
 
-                time = datetime.strptime(time_now, format) - \
-                    datetime.strptime(time_scraped, format)
-                # time = time.strftime("%H:%M:%S")
-                return time
-            else:
-                print("Invalid Time")
-            time = time.strftime("%H:%M:%S")
-            # print("--------Time ---------------------", time)
+            #     time = datetime.strptime(time_now, format) - \
+            #         datetime.strptime(time_scraped, format)
+            #     # time = time.strftime("%H:%M:%S")
+            #     return time
+            # else:
+            #     print("Invalid Time")
+            # time = time.strftime("%H:%M:%S")
+            # # print("--------Time ---------------------", time)
             return time
 
         except:
@@ -136,16 +141,20 @@ class DW():
 
     def News_Date(self, soup):
         try:
+            date = soup.find('span', class_=[
+                "date date_article-header"]).get_text(strip=True)
+            date = date[:-6]
+            return date
 
-            cur_date = soup.find('time').text
-            print("-------------------------------------------------------------------")
-            print('----------------', cur_date,)
-            if "ago" in cur_date:
-                today = d.today()
-                today = today.strftime("%m/%d/%Y")
-                return today
-            else:
-                return cur_date
+            # cur_date = soup.find('time').text
+            # print("-------------------------------------------------------------------")
+            # print('----------------', cur_date,)
+            # if "ago" in cur_date:
+            #     today = d.today()
+            #     today = today.strftime("%m/%d/%Y")
+            #     return today
+            # else:
+            #     return cur_date
 
         except:
             return "No Date"
@@ -209,8 +218,8 @@ class DW():
 
     def Image_Alt_Text(self, soup):
         try:
-            images_alt = soup.find("meta",  {"property": "og:image:alt"})[
-                'content']
+            images_alt = soup.find(
+                "div",   class_=["media__footer media__footer_bottom"]).get_text(strip=True)
             return images_alt
         except:
             images_alt = None
@@ -536,39 +545,39 @@ class DW():
         return country, city, address, latitude, longitude
 
     def Scrap_Links(self, url):
-        main_url = 'https://www.dw.com/'
+        main_url = 'https://www.rt.com/'
         html_document = self.HTML_Document(url)
-
+        #print("-----------------------------------------url", url)
         if html_document is not None:
             soup = self.B_Soup(html_document)
+            # print(soup)
             all_links = []
+            all_links = []
+            print("-------------------all links")
+            className = 'main-promobox__item'
+            tag = 'li'
+            print(url)
+            if 'news' in url:
+                print("In russia")
+                className = 'listCard-rows__content'
+                tag = 'div'
+            elif 'russia' in url:
+                className = 'listCard-rows__content'
+                tag = 'div'
+
+            print(tag, className)
             # 'full-light-container'
             results = soup.find_all(
-                'div', class_=['news', ])
+                tag, class_=[className, ])
             # results_links = [i for i in results if i is not None]
             for div in results:
                 links = div.findAll('a', href=True)
-                # a_tag.append(links)
-                for a in links:
-                    if a['href'] and len(a['href']) > 50:
-                        link = main_url + a['href']
-                        all_links.append(link)
-                        # print(link)
 
-                    else:
-                        continue
-            results = soup.find_all(
-                'div', class_=['news', ])
-            # results_links = [i for i in results if i is not None]
-            for div in results:
-                links = div.findAll('a', href=True)
                 # a_tag.append(links)
                 for a in links:
-                    if a['href'] and len(a['href']) > 50:
+                    #print("HREF and its lenth -------------------->",a['href'], len(a['href']))
+                    if a['href'] and len(a['href']) > 30:
                         link = main_url + a['href']
-                        if 'video' in link:
-                            print("This link contains video")
-                            continue
                         all_links.append(link)
                         # print(link)
 
@@ -581,14 +590,14 @@ class DW():
             print('connection error')
             return None
 
-    def Scrap_DW(self, url, name, **kwargs):
+    def Scrap_RT(self, url, name, **kwargs):
         df_news = {"News_URL": [], "News_Source": [], "News_Title": [],  "News_Date": [], "News_Time": [], "News_Authors": [], "News_Authors_Source": [],  "News_Image_Link": [], "News_Image_Caption": [],
                    "News_Proper_Nouns": [], "News_Verbs": [], "News_Cardinal_Digit": [], "News_Target_Names": [], "News_Total_Words": [], "News_Total_Summary_Words": [],
                    'News_Word_Cloud': [], 'News_Summary_Word_Cloud': [], "News_Short_Description": [], "News_Detail": [], "News_Summary": [], "News_Polarity_Score": [],
                    "News_Subjectivity": [], "News_Sentiments": [], "News_Classification": [], "News_Section": [], "News_Event": [], "News_Country": [], "News_City": [],
                    "News_Address": [], "News_Latitude": [], "News_Longitude": []}
         # extract all links using the above function
-        print("-------------------------------Scrapping DW Germany NewsPaper-------------------------------")
+        print("-------------------------------Scrapping RT Russia NewsPaper-------------------------------")
         i = 0
         article_urls = self.Scrap_Links(url)
         if article_urls is not None:
@@ -643,7 +652,7 @@ class DW():
                     print(
                         f'News Total Words in News Details:  {total_news_words}\n')
                     print(
-                        f'News Total Words in News Summary:  {total_news_words}\n')
+                        f'News Total Words in News Summary:  {total_summary_words}\n')
                     print(f'News Article:  {news_text}\n')
                     print(f'News Summary:  {news_summary}\n')
                     print(
@@ -718,53 +727,40 @@ class DW():
 
     def scrap_latest_news(self, article_url,  **kwargs):
         print("-------------------------------Scraping Latest Tab News-------------------------------")
-        df_latest = self.Scrap_DW(article_url, 'Latest')
+        df_latest = self.Scrap_RT(article_url, 'Latest')
         # df_latest = pd.DataFrame.from_dict(df_latest)
         return df_latest
 
     def scrap_national_news(self,  article_url, **kwargs):
         print("-------------------------------Scraping National Tab News-------------------------------")
-        df_national = self.Scrap_DW(article_url, 'National')
+        df_national = self.Scrap_RT(article_url, 'National')
         # df_national = pd.DataFrame.from_dict(df_national)
         return df_national
 
     def scrap_world_news(self,  article_url, **kwargs):
         print("-------------------------------Scraping International Tab News-------------------------------")
-        df_national = self.Scrap_DW(article_url, 'International')
+        df_national = self.Scrap_RT(article_url, 'International')
         # df_national = pd.DataFrame.from_dict(df_news)
         return df_national
 
 
 if __name__ == "__main__":
-    print("-------------------------------Scraping DW Germany News -------------------------------")
-    scrap = DW()
-    latest = 'https://www.dw.com/en/top-stories/s-9097'
-    national = 'https://www.dw.com/en/germany/s-1432'
+    print("-------------------------------Scraping RT Russia News -------------------------------")
+    scrap = RT()
+    latest = 'https://www.rt.com/'
+    national = 'https://www.rt.com/russia/'
 
-    regions = ['africa/s-12756', 'latin-america/s-58267484',
-               'asia/s-12758', 'middle-east/s-14207', 'europe/s-1433', 'north-america/s-58267502']
-
+    world = 'https://www.rt.com/news/'
 #
     scrap_latest = scrap.scrap_latest_news(latest)
     scrap_national = scrap.scrap_national_news(national)
-    regional = pd.DataFrame()
-    for i in range(len(regions)):
-        url = 'https://www.dw.com/en/'+regions[i]
-        print(url)
-        scrap_world = scrap.scrap_world_news(url)
-        df_news = pd.DataFrame.from_dict(scrap_world)
-
-        #df_news.to_csv(region.replace('/', '_')+'.csv', index=False)
-        if i == 0:
-            regional = df_news
-        else:
-            regional = pd.concat([regional, df_news], axis=0)
+    scrap_world = scrap.scrap_world_news(world)
 
     df_latest = pd.DataFrame.from_dict(scrap_latest)
     df_national = pd.DataFrame.from_dict(scrap_national)
-    df_world = pd.DataFrame.from_dict(regional)
-    Path("DW").mkdir(parents=True, exist_ok=True)
-    df_latest.to_csv('DW/DW_latest.csv', index=False)
-    df_national.to_csv('DW/DW_national.csv', index=False)
-    df_world.to_csv('DW/DW_world.csv', index=False)
+    df_world = pd.DataFrame.from_dict(scrap_world)
+    Path("RT").mkdir(parents=True, exist_ok=True)
+    df_latest.to_csv('RT/RT_latest.csv', index=False)
+    df_national.to_csv('RT/RT_national.csv', index=False)
+    df_world.to_csv('RT/RT_world.csv', index=False)
     # df_news.head()
