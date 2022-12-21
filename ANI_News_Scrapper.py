@@ -46,12 +46,11 @@ import time as t
 from string import punctuation
 import string
 from spacy.lang.en import English
-from models.spacy_summarization import text_summarizer
+from spacy_summarization import text_summarizer
 from geotext import GeoText
 from geopy.geocoders import Nominatim
 from collections import Counter
 from collections import defaultdict
-from pathlib import Path
 # from practice import news_authors, news_title
 punctuations = string.punctuation
 nlp = English()
@@ -447,8 +446,8 @@ class ANI_News():
         news_content_clean.append(self.Data_Cleaning(news_text))
         news_content_clean[0]
         tf_load_vec = joblib.load(
-            'models/news_classification_model_tf_vectorizer.pkl')
-        model = joblib.load('models/news_classification_model.pkl')
+            'news_classification_model_tf_vectorizer.pkl')
+        model = joblib.load('news_classification_model.pkl')
         extract = tf_load_vec.transform(news_content_clean)
         prediction = model.predict(extract)
         prediction = prediction[0].capitalize()
@@ -468,8 +467,8 @@ class ANI_News():
         news_content_clean.append(self.Data_Cleaning(news_text))
         news_content_clean[0]
         tf_load_vec = joblib.load(
-            'models/news_classification_model_tf_vectorizer.pkl')
-        model = joblib.load('models/news_classification_model.pkl')
+            'news_classification_model_tf_vectorizer.pkl')
+        model = joblib.load('news_classification_model.pkl')
         extract = tf_load_vec.transform(news_content_clean)
         prediction = model.predict(extract)
         prediction = prediction[0].capitalize()
@@ -657,7 +656,7 @@ class ANI_News():
                     print(
                         f'News Total Words in News Details:  {total_news_words}\n')
                     print(
-                        f'News Total Words in News Summary:  {total_summary_words}\n')
+                        f'News Total Words in News Summary:  {total_news_words}\n')
                     print(f'News Article:  {news_text}\n')
                     print(f'News Summary:  {news_summary}\n')
                     print(
@@ -759,15 +758,11 @@ if __name__ == "__main__":
     national = 'https://aninews.in/category/national/'
     world = 'https://aninews.in/category/world/'
     
-    scrap_latest = scrap.scrap_latest_news(latest)
+    # scrap_latest = scrap.scrap_latest_news(latest)
     scrap_national = scrap.scrap_national_news(national)
-    scrap_world = scrap.scrap_world_news(world)
+    # scrap_world = scrap.scrap_world_news(world)
     
-    Path("ANI").mkdir(parents=True, exist_ok=True)
-    df_latest = pd.DataFrame.from_dict(scrap_latest)
-    df_national = pd.DataFrame.from_dict(scrap_national)
-    df_world = pd.DataFrame.from_dict(scrap_world)
-    df_latest.to_csv('ANI/Latest_ANI.csv', index=False)
-    df_national.to_csv('ANI/National_ANI.csv', index=False)
-    df_world.to_csv('ANI/World_ANI.csv', index=False)
+    
+    # df_news = pd.DataFrame.from_dict(national)
+    # df_news.to_csv('all_ANI_News_wrold_scraped.csv', index=False)
     # df_news.head()
