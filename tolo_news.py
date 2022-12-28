@@ -13,14 +13,11 @@ The News are from the given url.
     -Eurasian Times, India
     -The New Indian Express
     -The Print, India
-    
-    
 
 Input:
     url: The url of the news website
 Output:
     news_df: The dataframe file of the news
-
 
 """
 

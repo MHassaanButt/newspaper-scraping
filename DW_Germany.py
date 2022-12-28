@@ -19,7 +19,6 @@ Input:
 Output:
     news_df: The dataframe file of the news
 
-
 """
 
 # import the required modules and libraries
