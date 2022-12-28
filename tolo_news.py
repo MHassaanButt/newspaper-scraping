@@ -1,7 +1,20 @@
 """
 In this script, we will be extracting the news from the given url. The news will be stored in a dataframe file.
 The News are from the given url.
-
+    -TheNews 
+    -Hindustan Times
+    -BBC News
+    -Economic Times
+    -The Hindu
+    -The Indian Express
+    -The Times of India
+    -The Tribune
+    -The Wire
+    -Eurasian Times, India
+    -The New Indian Express
+    -The Print, India
+    
+    
 
 Input:
     url: The url of the news website
@@ -12,19 +25,13 @@ Output:
 """
 
 # import the required modules and libraries
-from sympy import elliptic_f
-import textacy
-from sklearn.feature_extraction.text import TfidfVectorizer
-import joblib
-from collections import Counter
-from spacy import displacy
-from textblob import TextBlob
 import en_core_web_sm
+import json
 from nltk.tokenize import word_tokenize, sent_tokenize
-import nltk
-from wordcloud import WordCloud
-from spacy.language import Language
-from datetime import datetime, time
+from datetime import datetime
+from datetime import date
+import time
+from time import ctime
 import re
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
@@ -34,30 +41,19 @@ from nltk import word_tokenize
 # from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.stem.porter import PorterStemmer
-from newspaper import Article
-import newspaper
-from newspaper import Config
-from nltk.tag import pos_tag
 from spacy.lang.en.stop_words import STOP_WORDS
 from gensim.parsing.preprocessing import remove_stopwords
-import time as t
-from string import punctuation
 import string
 from spacy.lang.en import English
-from spacy_summarization import text_summarizer
-from geotext import GeoText
-from geopy.geocoders import Nominatim
-from collections import Counter
-from collections import defaultdict
-
+import utils as utils
 # from practice import news_authors, news_title
 punctuations = string.punctuation
 nlp = English()
 nlp = en_core_web_sm.load()
 # stop_words = set(stopwords.words('english'))
 nlp.add_pipe('sentencizer')  # updated
-
 parser = English()
+
 stopwords = ["1qfy23", "eu", "t", "and", "s", "â€", "0o", "0s", "3a", "3b", "3d", "6b", "6o", "a", "a1", "a2", "a3",
              "a4", "ab", "able", "about", "above", "abst", "ac", "accordance", "according", "accordingly", "across",
              "act", "actually", "ad", "added", "adj", "ae", "af", "affected", "affecting", "affects", "after",
@@ -156,7 +152,9 @@ stopwords = ["1qfy23", "eu", "t", "and", "s", "â€", "0o", "0s", "3a", "3b",
              "zero", "zi", "zz", ] + list(STOP_WORDS)
 
 
-main_url = 'https://tolonews.com/'
+main_url = 'https://tolonews.com'
+
+
 class Tolo_News():
     """
     This class will be used to scrap the news from the given url.
@@ -191,74 +189,73 @@ class Tolo_News():
             if title:
                 return title
             else:
-                title = soup.find('h2', class_=['tdb-block-inner td-fix-index', 'text-7.5', 'font-bold',
-                                                'font-playfair-display', 'mt-1', 'pb-3', 'border-b', 'border-gray-300',
-                                                'border-solid',
-                                                'text-6', 'sm:text-10.5', 'text-center',
-                                                'text-black-400 hover:text-pink-default', 'leading-tight', 'mt-2',
-                                                'sm:mt-8', 'pb-4  ']).get_text(strip=True)
-                title = soup.find('h1').get_text(strip=True)
+                title = soup.find(
+                    'h2', class_=['grey-dark1 title-top-post-tolonews']).get_text(strip=True)
         except:
             title = "No Title"
         return title
 
     def News_Time(self, soup):
         try:
-            time = soup.find("meta", {"property": "article:published_time"})[
-                'content']
-            time = time.split(' ')[1]
-            if time:
-                return time
+            res = soup.find('script', type = 'application/ld+json')
+            json_object = json.loads(res.contents[0])
+            # print(json_object['@graph']).text
+            news_time = json_object['@graph'][0]['datePublished']
+            news_time = news_time.split('T')[1].split('+')[0]
+            if news_time:
+                return news_time
             else:
-                time = soup.find(
-                    'span', class_=["timestamp--time", "timeago"]).attrs['title']
-                time = re.sub('\s+', ' ', time)
-                time = time.split('T')[1]
-                time = time.split('+')[0]
+                news_time = soup.find('div', class_=["profile_data"]).get_text(strip = True)
         except:
             now = datetime.now()
-            time = now.strftime("%H:%M:%S")
-
-        return time
+            news_time = now.strftime("%H:%M:%S")
+        return news_time
 
     def News_Date(self, soup):
         try:
-            date = soup.find("meta", {"property": "article:published_time"})[
-                'content']
-            date = date.split('T')[0]
+            res = soup.find('script', type = 'application/ld+json')
+            json_object = json.loads(res.contents[0])
+            # print(json_object['@graph']).text
+            news_date = json_object['@graph'][0]['datePublished']
+            news_date = news_date.split('T')[0]
+            return news_date
         except:
-            date = soup.find('span', class_=[
-                "timestamp--date", "time-red ", " timeago"]).get_text(strip=True).replace('Published', '')
-        return date
+                # dd/mm/YY
+                today = date.today()
+                news_date = today.strftime("%d/%m/%Y")
+        return news_date
 
         # date = re.sub('\s+', ' ', date)[0:11]
         # date = soup.find('div', attrs={'class': "dateTime secTime"}).get_text(strip=True)[13:]
 
-    def News_Source(self, soup):
+    def News_Authors(self, soup):
         try:
-            source = soup.find("meta", {"name": "author"}).attrs['content']
-            if source:
-                return source
-            else:
-                source = soup.find(
-                    'a', class_=['story__byline__link']).get_text(strip=True)
+            author = soup.find('div', class_=['darkgrey-color']).get_text(strip=True).replace('By', '').replace(',', '')
         except:
-            source = "No Source"
-        return source
+            author = "Author not Available!"
+        return author
 
-    def News_Source_Link(self, soup):
+    def News_Author_Link(self, soup):
         try:
-            source_link = soup.find(
+            author_link = soup.find(
                 "meta", {"property": "article:author"})['content']
-            if source_link:
-                return source_link
+            if author_link:
+                return author_link
             else:
-                source_link = soup.find(
+                author_link = soup.find(
                     'div', class_=['article-top-author-nw-nf-left']).get('href')
-            # source_link = source_link
+                author_name = soup.find(
+                    'div', class_=['article-top-author-nw-nf-left'])
+                author_picture = soup.find(
+                    'div', class_=['article-top-author-nw-nf-left'])
+                author_job = soup.find(
+                    'div', class_=['article-top-author-nw-nf-left'])
+                author_bio = soup.find(
+                    'div', class_=['article-top-author-nw-nf-left'])
+            # author_link = author_link
         except:
-            source_link = "No Source Link"
-        return source_link
+            author_link = "Not Available"
+        return author_link
 
     def Image_URL(self, soup):
         try:
@@ -266,7 +263,8 @@ class Tolo_News():
             if image_src is not None:
                 return image_src
             else:
-                image_src = soup.find('div', class_=["img-container"]).find('img')['src']
+                image_src = soup.find(
+                    'div', class_=["img-wrap", "img-video-widget"]).find('img')['src']
         except:
             image_src = "No Image Link"
         return image_src
@@ -280,29 +278,12 @@ class Tolo_News():
 
         return images_alt
 
-    # def Image_Alt_Text(self, soup):
-    #     try:
-    #         images = soup.find('figcaption', class_=[
-    #                            "img-container"]).get_text(strip=True)
-    #         if not images:
-    #             image_alt = None
-    #         else:
-    #             for img in images:
-    #                 if img.find('img') is not None:
-    #                     image_alt = img.find('img')['alt']
-    #                     return image_alt
-    #                 else:
-    #                     image_alt = None
-    #         return images_alt
-    #     except:
-    #         images_alt = None
-    #         return images_alt
-
     def News_Detail(self, soup):
         # try:
         article_text = ''
         try:
-            definition = soup.find('div', class_=['content count-br', 'story-detail'])
+            definition = soup.find('div', class_=[
+                                   'entry-summary clearfix'])
             for p in definition.find_all('p'):
                 article_text = article_text + p.get_text(strip=True)
             # article = soup.find('story-detail').find_all('p').text
@@ -322,319 +303,65 @@ class Tolo_News():
 
     def Short_Description(self, soup):
         try:
-            short_desc = soup.find("meta", {"property": "og:description"})['content'].strip()
+            short_desc = soup.find("meta", {"property": "og:description"})[
+                'content'].strip()
             if short_desc is not None:
                 return short_desc
             else:
                 short_desc = soup.find(
-                    'h3', attrs={'class': 'preamble-nf'}).get_text(strip=True)
+                    'div', class_=['intro part-left', 'full-width-col-mobile']).p.get_text(strip=True)
         except:
             short_desc = "No Short Description"
         return short_desc
 
-    def News_Events(self, short_description):
-        """
-        This function will return the events of the News from the given soup object.
-        """
-        # Extract words from the text file.
-        words = self.Get_Words(short_description)
-        # Get the list of events from the words.
-        events = parser.get_events(words)
-        # Print the events.
-        return events
-
-    def News_POS(self, news_text):
-        news_subjectivity = self.Get_Subjectivity(news_text)
-        news_polarity = self.Get_Polarity(news_text)
-        news_sentiment = self.Get_Analysis(news_polarity)
-        tokenized = sent_tokenize(news_text)
-
-        tag = []
-        for j in tokenized:
-            wordsList = nltk.word_tokenize(j)
-            wordsList = [w for w in wordsList if not w in stopwords]
-            tagged = nltk.pos_tag(wordsList)
-            tag.append(tagged)
-        nouns = []
-        for k in tag:
-            for l in range(len(k)):
-                if k[l][1] == 'NN' or k[l][1] == 'NNPS':
-                    nouns.append(k[l][0])
-        news_nouns = self.Dup_Function(nouns)
-        proper_noun = []
-        for m in tag:
-            for n in range(len(m)):
-                if m[n][1] == 'NNP' or m[n][1] == 'NNPS':
-                    proper_noun.append(m[n][0])
-        proper_noun = self.Dup_Function(proper_noun)
-        complete_nouns = nouns + proper_noun
-        news_complete_nouns = self.Dup_Function(complete_nouns)
-        verbs = []
-        for o in tag:
-            for p in range(len(o)):
-                if o[p][1] == 'VB' or o[p][1] == 'VBD' or o[p][1] == 'VBG' or o[p][1] == 'VBN' or o[p][1] == 'VBP' or \
-                        o[p][1] == 'VBZ':
-                    verbs.append(o[p][0])
-        news_verbs = self.Dup_Function(verbs)
-        cardinal_digit = []
-        for q in tag:
-            for r in range(len(q)):
-                if q[r][1] == 'CD':
-                    cardinal_digit.append(q[r][0])
-        news_cardinal_digit = self.Dup_Function(cardinal_digit)
-
-        return news_subjectivity, news_polarity, news_sentiment, news_complete_nouns, news_cardinal_digit, news_verbs
-
-    def Scrap_Articles_URL(self, link):
-        USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
-        config = Config()
-        config.browser_user_agent = USER_AGENT
-        config.request_timeout = 10
-        article_urls = set()
-        marketwatch = newspaper.build(
-            link, config=config, memoize_articles=False, language='en')
-        for sub_article in marketwatch.articles:
-            article = Article(sub_article.url, config=config,
-                              memoize_articles=False, language='en')
-            article.download()
-            article.parse()
-            if article.url not in article_urls:
-                article_urls.add(article.url)
-                # print(article.url, '\n')
-        return article_urls
-
-    def Get_Words(self, text):
-        # Extract words from a text file. Clean the words by removing surrounding
-        # punctuation and whitespace, and convert the word to singular.
-        words = text.replace("\n", " ")
-        words = parser.convert_abbreviations(words)
-        words = words.split(" ")
-        words = parser.remove_blanks(words)
-        for i in range(0, len(words)):
-            words[i] = parser.clean(words[i])
-        return words
-
-    def Dup_Function(self, x):
-
-        return list(dict.fromkeys(x))
-
-    def Get_Subjectivity(self, text):
-        """_summary_sentences_to_text(self, sentences):
-
-        Args:
-            text (_type_): The text to be analyzed.
-
-        Returns:
-            _type_: The subjectivity of the text.
-        """
-        return TextBlob(text).sentiment.subjectivity
-
-    def Get_Polarity(self, text):
-        """_summary_ sentences_polarity(self, sentences, sentence_polarity):
-
-        Args:
-            text (_type_): The text to be analyzed.
-
-        Returns:
-            _type_: The polarity of the text in form of percentage.
-        """
-
-        return TextBlob(text).sentiment.polarity
-
-    def Get_Analysis(self, score, **kwargs):
-        if score < -0.5 and score >= -0.7:
-            return "Very Negative"
-        elif score == 0 and score < 0.1:
-            return "Neutral"
-        elif score > 0.7:
-            return "Very Postive"
-        elif score > 0.5 and score <= 0.7:
-            return "Positive"
-        elif score > 0.3 and score <= 0.5:
-            return "Slightly Positive"
-        elif score > 0 and score <= 0.3:
-            return "Weakly Positive"
-        elif score < -0.7:
-            return "Very Negative"
-        elif score < -0.3 and score >= -0.5:
-            return "Slightly Negative"
-        elif score < 0 and score >= -0.3:
-            return "Weakly Negative"
-
-    def Count_Text_Words(self, news_text, **kwargs):
-        news_words = [i for i in news_text.lower().split() if i not in stopwords]
-        news_words = self.Dup_Function(news_words)
-        # news_words = [i for i in word_tokenize(news_text.lower()) if i not in stopwords]
-        clean_text = (" ").join(news_words)
-        # clean_text = self.Remove_non_Ascii(clean_text)
-        news_words = [i for i in news_text.lower().split() if i not in stopwords]
-        news_words_count = len(news_words)
-
-        # news_word_cloud = WordCloud(collocations = False, background_color = 'white').generate(clean_text)
-        word_cloud = news_words.copy()
-        # dic = news_word_cloud.words_
-        # for key, value in dic.items():
-        #     word_cloud.append(key)
-        return news_words_count, word_cloud
-
-    # find the all the names
-    def News_Target_Names(self, news_details, **kwargs):
-        target_names = nlp(news_details)
-        target_names = [(X.text, X.label_) for X in target_names.ents]
-        target_names = [x for x in target_names if 'PERSON' in x[1]]
-        target_names = ', '.join([tup[0] for tup in target_names])
-        return target_names
-
-    def Article_Summary(self, soup):
-        news_image_link = self.Image_URL(soup)
-        news_text = self.News_Detail(soup)
-        news_text = news_text.replace("\"", "")
-        news_text = re.sub(r'(?!(([^"]*"){2})*[^"]*$),', '', news_text)
-        news_text = news_text.replace("'", " ")
-        news_text = news_text.replace("\n", "")
-        news_text = news_text.replace('"', '')
-        if news_text == '':
-            news_text = 'NAN'
-        else:
-            try:
-                news_summary = text_summarizer(news_text).replace("\n", "")
-                total_news_words, news_word_cloud = self.Count_Text_Words(news_text)
-                total_summary_words, summary_word_cloud = self.Count_Text_Words(news_summary)
-            except:
-                news_summary = 'No Summary'
-                total_news_words = 0
-                news_word_cloud = []
-                total_summary_words = 0
-                summary_word_cloud = []
-        return news_text, news_summary, total_news_words, total_summary_words, news_image_link, news_word_cloud, summary_word_cloud
-
-    def Data_Cleaning(self, text):
-
-        # split into sentences
-        words = word_tokenize(text)
-        words = [word for word in words if word.isalpha()]
-
-        # remove stop words in sentence
-        stop_words = set(stopwords)
-        words = [w for w in words if not w in stop_words]
-        # print(words[:100])
-
-        # please it comment if you don't want to use Lemmatizer
-        # lemmatizing of words
-        lmtzr = WordNetLemmatizer()
-        words = [lmtzr.lemmatize(word) for word in words]
-        # print(lemmt[:100])
-
-        # stemming of words
-        porter = PorterStemmer()
-        words = [porter.stem(word) for word in words]
-        return (" ".join(str(x) for x in words))
-
-    def Event_Extraction(self, news_short_desc, **kwargs):
-        #     pip install textacy
-        pattern = [{'POS': 'VERB'}]
-        doc = nlp(news_short_desc)
-        news_events = textacy.extract.token_matches(doc, patterns=pattern)
-        # print(" Event In News ", events)
-        news_events = ' '.join([str(elem) for elem in news_events])
-        return news_events
-
-    def News_Classifier(self, news_text):
-        news_content_clean = []
-        news_content_clean.append(self.Data_Cleaning(news_text))
-        news_content_clean[0]
-        tf_load_vec = joblib.load(
-            'news_classification_model_tf_vectorizer.pkl')
-        model = joblib.load('news_classification_model.pkl')
-        extract = tf_load_vec.transform(news_content_clean)
-        prediction = model.predict(extract)
-        prediction = prediction[0].capitalize()
-        # print("News Category: ", prediction)
-        return prediction
-
     def News_Section(self, soup):
         try:
             news_section = soup.find(
-                'div', attrs={'class': 'secName'}).get_text(strip=True).title()
+                'div', attrs={'class': 'white-link-inside'}).get_text(strip=True)
+            news_section = news_section.split('/')[-1]
         except:
             news_section = "No Section"
         return news_section
 
-    def News_Classifier(self, news_text):
-        news_content_clean = []
-        news_content_clean.append(self.Data_Cleaning(news_text))
-        news_content_clean[0]
-        tf_load_vec = joblib.load(
-            'news_classification_model_tf_vectorizer.pkl')
-        model = joblib.load('news_classification_model.pkl')
-        extract = tf_load_vec.transform(news_content_clean)
-        prediction = model.predict(extract)
-        prediction = prediction[0].capitalize()
-        # print("News Category: ", prediction)
-        return prediction
+    def Scrap_Latest_Links(self, url):
+        html_document = self.HTML_Document(url)
+        if html_document is not None:
+            soup = self.B_Soup(html_document)
+            results = soup.find_all('h3', class_=['title-article'])
+            all_links = []
+            # results_links = [i for i in results if i is not None]
+            for div in results:
+                link = div.find('a', href=True)['href']
+                if len(link) > 10:
+                    news_link = main_url + link
+                    all_links.append(news_link)
+                    print(news_link)
+                else:
+                    continue
+            all_links = [i for i in set(all_links)]
+            print("all Links here:", all_links)
+            return all_links
 
-    def Geographic_Details(self, text):
-        """_summary_ : This function will return the geographic details of the news article
-
-        Args:
-            text (string): this function will take an input of the news article text
-
-        Returns:
-            _type_: The return of this function will return the geographic details of the news article like country, city, latitude, longitude, etc.
-        """
-        places = GeoText(text)
-        # contry = (','.join(str(a)for a in places.countries))
-        # city = (','.join(str(a)for a in places.cities))
-        try:
-            country = places.countries
-            temp = defaultdict(int)
-            for sub in country:
-                for wrd in sub.split():
-                    temp[wrd] += 1
-            country = max(temp, key=temp.get)
-        except:
-            country = " "
-        try:
-            city = places.cities
-            temp = defaultdict(int)
-            for sub in city:
-                for wrd in sub.split():
-                    temp[wrd] += 1
-            city = max(temp, key=temp.get)
-        except:
-            city = " "
-        try:
-            geolocator = Nominatim(user_agent="abc")
-            location = geolocator.geocode(city, language='en')
-            address = location.address
-            latitude = location.latitude
-            longitude = location.longitude
-        except:
-            address = " "
-            latitude = " "
-            longitude = " "
-        return country, city, address, latitude, longitude
+        else:
+            print('connection error')
+            return None
 
     def Scrap_World_Links(self, url):
         html_document = self.HTML_Document(url)
         if html_document is not None:
             soup = self.B_Soup(html_document)
             all_links = []
-
-            results = soup.find_all('div', class_=['wpb_wrapper', ])  # 'full-light-container'
-            # results = soup.find_all('div',
-            #                         class_=['col-md-9 col-sm-12 col-xs-12 left-block', ])  # 'full-light-container'
-            # results_links = [i for i in results if i is not None]
+            results = soup.find_all('h3', class_=['title-article'])  # 'full-light-container'
             for div in results:
                 links = div.findAll('a', href=True)
                 # a_tag.append(links)
                 for a in links:
-                    if a['href'] and len(a['href']) > 55:
-                        link = a['href']
-                        all_links.append(link)
-                        print(link)
-                    else:
-                        continue
+                    # if a['href'] and len(a['href']) > 10:
+                    link = main_url + a['href']
+                    all_links.append(link)
+                    print(link)
+                    # else:
+                    #     continue
             all_links = [i for i in set(all_links)]
             print("all Links here:", all_links)
             return all_links
@@ -642,56 +369,25 @@ class Tolo_News():
         else:
             print('connection error')
             return None
-
-    def Scrap_Latest_Links(self, url):
-        html_document = self.HTML_Document(url)
-        if html_document is not None:
-            soup = self.B_Soup(html_document)
-            all_links = []
-
-            # results = soup.find_all('div', class_=['col-md-8 col-sm-8 col-xs-12 left-block', ])#'full-light-container'
-            results = soup.find_all('div',
-                                    class_=[
-                                        'td_block_wrap td_flex_block_1 tdi_70 td-pb-border-top td_block_template_4 td_ajax_preloading_preload td_flex_block', ])  # 'full-light-container'
-            # results_links = [i for i in results if i is not None]
-            for div in results:
-                links = div.findAll('a', href=True)
-                # a_tag.append(links)
-                for a in links:
-                    if a['href'] and len(a['href']) > 10:
-                        link = main_url + a['href']
-                        all_links.append(link)
-                        print(link)
-                    else:
-                        continue
-            all_links = [i for i in set(all_links)]
-            print("all Links here:", all_links)
-            return all_links
-
-        else:
-            print('connection error')
-            return None
-
+        
     def Scrap_National_Links(self, url):
         html_document = self.HTML_Document(url)
         if html_document is not None:
             soup = self.B_Soup(html_document)
             all_links = []
 
-            results = soup.find_all('div', class_=['grey-dark1 title-top-post-tolonews', 'featured clearfix view view-articles view-id-articles'])  # 'full-light-container'
-            # results = soup.find_all('div',
-            #                         class_=['col-md-9 col-sm-12 col-xs-12 left-block', ])  # 'full-light-container'
+            results = soup.find_all('h3', class_=['title-article'])  # 'full-light-container'
             # results_links = [i for i in results if i is not None]
             for div in results:
                 links = div.findAll('a', href=True)
                 # a_tag.append(links)
                 for a in links:
-                    if a['href'] and len(a['href']) > 10:
-                        link = main_url + a['href']
-                        all_links.append(link)
-                        print(link)
-                    else:
-                        continue
+                    # if a['href'] and len(a['href']) > 10:
+                    link = main_url + a['href']
+                    all_links.append(link)
+                    print(link)
+                    # else:
+                    #     continue
             all_links = [i for i in set(all_links)]
             print("all Links here:", all_links)
             return all_links
@@ -701,54 +397,56 @@ class Tolo_News():
             return None
 
     def Scrap_Tolo_News(self, article_urls, name, **kwargs):
-        df_news = {"News_URL": [], "News_Source": [], "News_Title": [], "News_Date": [], "News_Time": [],
-                   "News_Authors": [], "News_Authors_Source": [], "News_Image_Link": [], "News_Image_Caption": [],
-                   "News_Proper_Nouns": [], "News_Verbs": [], "News_Cardinal_Digit": [], "News_Target_Names": [],
-                   "News_Total_Words": [], "News_Total_Summary_Words": [],
-                   'News_Word_Cloud': [], 'News_Summary_Word_Cloud': [], "News_Short_Description": [],
-                   "News_Detail": [], "News_Summary": [], "News_Polarity_Score": [],
-                   "News_Subjectivity": [], "News_Sentiments": [], "News_Classification": [], "News_Section": [],
-                   "News_Event": [], "News_Country": [], "News_City": [],
+        df_news = {"News_URL": [], "News_Source": [], "News_Title": [],  "News_Date": [], "News_Time": [], "News_Authors": [], "News_Authors_Source": [],  "News_Image_Link": [], "News_Image_Caption": [],
+                   "News_Proper_Nouns": [], "News_Verbs": [], "News_Cardinal_Digit": [], "News_Target_Names": [], "News_Total_Words": [], "News_Total_Summary_Words": [],
+                   'News_Word_Cloud': [], 'News_Summary_Word_Cloud': [], "News_Short_Description": [], "News_Detail": [], "News_Summary": [], "News_Polarity_Score": [],
+                   "News_Subjectivity": [], "News_Sentiments": [], "News_Classification": [], "News_Section": [], "News_Event": [], "News_Country": [], "News_City": [],
                    "News_Address": [], "News_Latitude": [], "News_Longitude": []}
         # extract all links using the above function
-        print("-------------------------------Scrapping Tolo News Paper-------------------------------")
+        print("-------------------------------URL Scrapped from Requested Tab-------------------------------")
         i = 0
         if article_urls is not None:
             print(
-                "-------------------------------Scrapping All Links from current Page----------------------------------")
+                "-------------------------------Scrapping All Links----------------------------------")
             print(
-                "-------------------------------Totatl URL's Scrapped from Requested Link: ", len(article_urls),
-                '---------------------')
-            for url in article_urls:  # [:5]
-                print("Scraping Sub URL # ", i, "\nLink :", url)
+                "-------------------------------Totatl URL's Scrapped from Requested Link: ", len(article_urls))
+            for url in article_urls:
+                print("Scrapping This News # ", i, "\nLink :", url)
                 html = self.HTML_Document(url)
                 if html is not None:
                     soup = self.B_Soup(html)
                     news_title = self.News_Title(soup)
-                    news_authors = self.News_Source(soup)
-                    news_authors_source = self.News_Source_Link(soup)
                     news_time = self.News_Time(soup)
                     news_date = self.News_Date(soup)
+                    news_authors = self.News_Authors(soup)
+                    news_authors_link = self.News_Author_Link(soup)
                     news_short_desc = self.Short_Description(soup)
+                    news_image_link = self.Image_URL(soup)
                     news_image_text = self.Image_Alt_Text(soup)
                     news_section = self.News_Section(soup)
-                    news_text, news_summary, total_news_words, total_summary_words, news_image_link, news_words, summary_words = self.Article_Summary(
-                        soup)
-                    news_subjectivity, news_polarity, news_sentiment, news_complete_nouns, news_cardinal_digit, news_verbs = self.News_POS(
+                    news_text = self.News_Detail(soup)
+                    news_summary = utils.Article_Summary(news_text)
+                    total_news_words, news_words = utils.Count_Text_Words(
                         news_text)
-                    target_names = self.News_Target_Names(news_summary)
-                    news_classification = self.News_Classifier(news_text)
-                    news_event = self.Event_Extraction(news_short_desc)
-                    country, city, address, latitude, longitude = self.Geographic_Details(
+                    total_summary_words, summary_words = utils.Count_Text_Words(
+                        news_summary)
+                    news_subjectivity, news_polarity, news_sentiment, news_complete_nouns, news_cardinal_digit, news_verbs = utils.News_POS(
                         news_text)
+                    target_names = utils.News_Target_Names(news_summary)
+                    news_classification = utils.News_Classifier(news_text)
+                    news_event = utils.Event_Extraction(soup, news_short_desc)
+                    country, city, address, latitude, longitude = utils.Geographic_Details(
+                        news_text)
+                    # news_words, news_count = self.count(news_text)
+                    # summary_count = self.count(news_summary)
                     print('**********************************')
                     print(f'News URL: {url}\n')
-                    print(f'News Source: {name}\n')
+                    print(f'News Authors: {name}\n')
                     print(f'News Section: {news_section}\n')
                     print(f'News Title: {news_title}\n')
                     print(f'News Author: {news_authors}\n')
                     print(
-                        f'News Author Source link: {news_authors_source}\n')
+                        f'News Author Authors link: {news_authors_link}\n')
                     print(f'News Publish Date: {news_date}\n')
                     print(f'News Publish Time: {news_time}\n')
                     print(f'News Short Description: {news_short_desc}\n')
@@ -776,7 +474,6 @@ class Tolo_News():
                     print(f'News Latitude:  {latitude}\n')
                     print(f'News Longitude:  {longitude}\n')
                     print('**********************************')
-
                     df_news["News_URL"].append(url)
                     df_news["News_Source"].append(name)
                     df_news["News_Section"].append(news_section)
@@ -785,7 +482,7 @@ class Tolo_News():
                     df_news["News_Time"].append(news_time)
                     df_news["News_Authors"].append(news_authors)
                     df_news["News_Authors_Source"].append(
-                        news_authors_source)
+                        news_authors_link)
                     df_news["News_Image_Link"].append(news_image_link)
                     df_news["News_Image_Caption"].append(news_image_text)
                     df_news["News_Short_Description"].append(
@@ -815,23 +512,29 @@ class Tolo_News():
                     df_news["News_Address"].append(address)
                     df_news["News_Latitude"].append(latitude)
                     df_news["News_Longitude"].append(longitude)
-
-                    i = i + 1
+                    i = i+1
                 else:
-                    print(
-                        "No HTML Document for Current Link -----> Access Denied")
+                    print("No HTML Document for Current Link -----> Access Denied")
                     print("System Sleeping Mode on for New Request!!! %s" %
-                          t.ctime())
-                    t.sleep(50)
-                    print("Cheecking for New Request!!! %s" % t.ctime())
+                          time.ctime())
+                    time.sleep(50)
+                    print("Cheecking for New Request!!! %s" % time.ctime())
                     continue
+        # else:
+        #     print("No Links Found in Current Page -----> Access Denied")
+        #     print("System Sleeping Mode on for New Request!!! %s" % time.ctime())
+        #     time.sleep(50)
+        #     print("Cheecking for New Request!!! %s" % time.ctime())
+        #     continue
 
             # except:
             #     #     # print("Oops! authors not found", sys.exc_info()[0], "occurred.")
             #     continue
-        print("Scraping Completed for the Current News Source!!!")
-
-        # df = pd.DataFrame.from_dict(df_news)
+        df = pd.DataFrame.from_dict(
+            df_news, orient='index').transpose()
+        df.to_csv('tolo_scraped.csv', index=False)
+        print("Scraping Completed for ", name, " Tab ")
+        print("Scraping Completed for the Requested Link")
         return df_news
 
     def scrap_latest_news(self, latest_url, **kwargs):
@@ -844,14 +547,16 @@ class Tolo_News():
     def scrap_national_news(self, latest_url, **kwargs):
         print("-------------------------------Scraping National Tab News-------------------------------")
         article_urls = self.Scrap_National_Links(latest_url)
-        df_national = self.Scrap_Tolo_News(article_urls, 'Tolotimes AsiaPacific')
+        df_national = self.Scrap_Tolo_News(
+            article_urls, 'Tolotimes AsiaPacific')
         # df_national = pd.DataFrame.from_dict(df_national)
         return df_national
 
     def scrap_world_news(self, latest_url, **kwargs):
         print("-------------------------------Scraping International Tab News-------------------------------")
         article_urls = self.Scrap_World_Links(latest_url)
-        df_world = self.Scrap_Tolo_News(article_urls, 'Tolotimes International')
+        df_world = self.Scrap_Tolo_News(
+            article_urls, 'Tolotimes International')
         # df_national = pd.DataFrame.from_dict(df_news)
         return df_world
 
@@ -859,13 +564,13 @@ class Tolo_News():
 if __name__ == "__main__":
     print("-------------------------------Scraping Tolotimes News -------------------------------")
     scrap = Tolo_News()
-    latest = 'https://eurasiantimes.com/'
-    national = 'https://tolonews.com/afghanistan'
-    world = 'https://tolonews.com/world'
+    latest = 'https://tolonews.com/'
+    national = 'https://tolonews.com/afghanistan/all'
+    world = 'https://tolonews.com/world/all'
 
     # scrap_latest = scrap.scrap_latest_news(latest)
-    scrap_national = scrap.scrap_national_news(national)
-    # scrap_world = scrap.scrap_world_news(world)
+    # scrap_national = scrap.scrap_national_news(national)
+    scrap_world = scrap.scrap_world_news(world)
 
     # df_news = pd.DataFrame.from_dict(national)
     # df_news.to_csv('all_Tolo_News_wrold_scraped.csv', index=False)
