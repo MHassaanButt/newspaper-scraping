@@ -12,9 +12,7 @@ The News are from the given url.
     -The Wire
     -Eurasian Times, India
     -The New Indian Express
-    -The Print, India
-    
-    
+    -The Print, India    
 
 Input:
     url: The url of the news website
